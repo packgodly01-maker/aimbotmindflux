@@ -1,0 +1,181 @@
+-- ⚡ TELEPORT BY MINDFLUX
+-- LocalScript
+
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+--------------------------------------------------
+-- GUI
+--------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "MindfluxTeleport"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Window
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0,350,0,260)
+frame.Position = UDim2.new(0.35,0,0.3,0)
+frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Parent = gui
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,40)
+title.BackgroundTransparency = 1
+title.Text = "⚡ teleport by mindflux"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(0,0,0)
+title.Parent = frame
+
+-- Close Button
+local close = Instance.new("TextButton")
+close.Size = UDim2.new(0,30,0,30)
+close.Position = UDim2.new(1,-35,0,5)
+close.Text = "X"
+close.Font = Enum.Font.GothamBold
+close.TextSize = 18
+close.BackgroundColor3 = Color3.fromRGB(230,230,230)
+close.Parent = frame
+
+-- Discord footer
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1,0,0,25)
+footer.Position = UDim2.new(0,0,1,-25)
+footer.BackgroundTransparency = 1
+footer.Text = "https://discord.gg/q5TRcd2HqM"
+footer.Font = Enum.Font.Gotham
+footer.TextSize = 14
+footer.TextColor3 = Color3.fromRGB(0,0,0)
+footer.Parent = frame
+
+--------------------------------------------------
+-- REOPEN BUTTON (M)
+--------------------------------------------------
+local reopen = Instance.new("TextButton")
+reopen.Size = UDim2.new(0,45,0,45)
+reopen.Position = UDim2.new(0,15,0.5,0)
+reopen.Text = "M"
+reopen.Font = Enum.Font.GothamBlack
+reopen.TextSize = 24
+reopen.BackgroundColor3 = Color3.fromRGB(255,255,255)
+reopen.Visible = false
+reopen.Parent = gui
+
+close.MouseButton1Click:Connect(function()
+	frame.Visible = false
+	reopen.Visible = true
+end)
+
+reopen.MouseButton1Click:Connect(function()
+	frame.Visible = true
+	reopen.Visible = false
+end)
+
+--------------------------------------------------
+-- DRAGGING
+--------------------------------------------------
+local dragging, dragInput, dragStart, startPos
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		frame.Position =
+			UDim2.new(startPos.X.Scale,startPos.X.Offset + delta.X,
+			startPos.Y.Scale,startPos.Y.Offset + delta.Y)
+	end
+end)
+
+--------------------------------------------------
+-- DISTANCE SLIDER
+--------------------------------------------------
+local distance = 6
+
+local slider = Instance.new("TextButton")
+slider.Size = UDim2.new(0.8,0,0,35)
+slider.Position = UDim2.new(0.1,0,0.35,0)
+slider.Text = "Distance: 6"
+slider.Font = Enum.Font.Gotham
+slider.TextSize = 16
+slider.BackgroundColor3 = Color3.fromRGB(240,240,240)
+slider.Parent = frame
+
+slider.MouseButton1Click:Connect(function()
+	distance += 2
+	if distance > 20 then
+		distance = 2
+	end
+	slider.Text = "Distance: "..distance
+end)
+
+--------------------------------------------------
+-- BLUE SHADOW BODY
+--------------------------------------------------
+local shadow = Instance.new("Part")
+shadow.Size = Vector3.new(2,5,1)
+shadow.Anchored = true
+shadow.CanCollide = false
+shadow.Color = Color3.fromRGB(0,170,255)
+shadow.Material = Enum.Material.Neon
+shadow.Transparency = 0.45
+shadow.Name = "ShadowBody"
+shadow.Parent = workspace
+
+RunService.RenderStepped:Connect(function()
+	if hrp and shadow then
+		shadow.CFrame =
+			hrp.CFrame * CFrame.new(0,0,-distance)
+	end
+end)
+
+--------------------------------------------------
+-- FLASH TP BUTTON
+--------------------------------------------------
+local tp = Instance.new("TextButton")
+tp.Size = UDim2.new(0.8,0,0,40)
+tp.Position = UDim2.new(0.1,0,0.55,0)
+tp.Text = "FLASH TP"
+tp.Font = Enum.Font.GothamBold
+tp.TextSize = 18
+tp.BackgroundColor3 = Color3.fromRGB(220,220,220)
+tp.Parent = frame
+
+tp.MouseButton1Click:Connect(function()
+	if hrp then
+		hrp.CFrame = shadow.CFrame + Vector3.new(0,3,0)
+	end
+end)
+
+--------------------------------------------------
+-- Footer on reopen button too
+--------------------------------------------------
+local footer2 = footer:Clone()
+footer2.Parent = reopen
+footer2.Size = UDim2.new(0,200,0,20)
+footer2.Position = UDim2.new(0,-75,1,0)
